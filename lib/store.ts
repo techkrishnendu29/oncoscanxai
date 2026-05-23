@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export interface Patient {
   id: string
@@ -171,38 +172,73 @@ const sampleDoctors: Doctor[] = [
     patientsCount: 12
   }
 ]
+export const useStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      currentUser: null,
+      patients: samplePatients,
+      doctors: sampleDoctors,
+      isAuthenticated: false,
+      guestPatientId: null,
 
-export const useStore = create<AppState>((set, get) => ({
-  currentUser: null,
-  patients: samplePatients,
-  doctors: sampleDoctors,
-  isAuthenticated: false,
-  guestPatientId: null,
-  
-  login: (user) => set({ currentUser: user, isAuthenticated: true }),
-  
-  logout: () => set({ currentUser: null, isAuthenticated: false, guestPatientId: null }),
-  
-  addPatient: (patient) => set((state) => ({ 
-    patients: [...state.patients, patient] 
-  })),
-  
-  updatePatient: (id, updates) => set((state) => ({
-    patients: state.patients.map(p => p.id === id ? { ...p, ...updates } : p)
-  })),
-  
-  deletePatient: (id) => set((state) => ({
-    patients: state.patients.filter(p => p.id !== id)
-  })),
-  
-  addDoctor: (doctor) => set((state) => ({
-    doctors: [...state.doctors, doctor]
-  })),
-  
-  setGuestPatientId: (id) => set({ guestPatientId: id }),
-  
-  getPatientById: (id) => get().patients.find(p => p.id === id)
-}))
+      login: (user) =>
+        set({
+          currentUser: user,
+          isAuthenticated: true,
+        }),
+
+      logout: () =>
+        set({
+          currentUser: null,
+          isAuthenticated: false,
+          guestPatientId: null,
+        }),
+
+      addPatient: (patient) =>
+        set((state) => ({
+          patients: [
+            ...state.patients,
+            patient,
+          ],
+        })),
+
+      updatePatient: (id, updates) =>
+        set((state) => ({
+          patients: state.patients.map((p) =>
+            p.id === id
+              ? { ...p, ...updates }
+              : p
+          ),
+        })),
+
+      deletePatient: (id) =>
+        set((state) => ({
+          patients: state.patients.filter(
+            (p) => p.id !== id
+          ),
+        })),
+
+      addDoctor: (doctor) =>
+        set((state) => ({
+          doctors: [
+            ...state.doctors,
+            doctor,
+          ],
+        })),
+
+      setGuestPatientId: (id) =>
+        set({ guestPatientId: id }),
+
+      getPatientById: (id) =>
+        get().patients.find(
+          (p) => p.id === id
+        ),
+    }),
+    {
+      name: 'oncoscan-storage',
+    }
+  )
+)
 
 // Demo credentials for testing
 export const demoCredentials = {
@@ -221,3 +257,4 @@ export const demoCredentials = {
     patientId: 'p1'
   }
 }
+
