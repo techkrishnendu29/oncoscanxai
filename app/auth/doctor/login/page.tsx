@@ -38,93 +38,75 @@ export default function DoctorLoginPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
- const handleSubmit = async (
-  e: React.FormEvent<HTMLFormElement>
-) => {
-  e.preventDefault()
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault()
 
-  setError('')
-  setIsLoading(true)
+    setError('')
+    setIsLoading(true)
 
-  try {
-    // 1. Sign in with Firebase Authentication
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email.trim(),
-      password
-    )
+    try {
+      const userCredential =
+        await signInWithEmailAndPassword(
+          auth,
+          email.trim(),
+          password
+        )
 
-    const user = userCredential.user
+      const user = userCredential.user
 
-    // 2. Reload user to get latest email verification status
-    await user.reload()
+      await user.reload()
 
-    // 3. Check if email is verified
-    if (!user.emailVerified) {
-      await signOut(auth)
-      setError('Please verify your email before logging in.')
-      return
+      if (!user.emailVerified) {
+        await signOut(auth)
+        setError(
+          'Please verify your email before logging in.'
+        )
+        return
+      }
+
+      const doctorRef = doc(db, 'doctors', user.uid)
+      const doctorSnap = await getDoc(doctorRef)
+
+      if (!doctorSnap.exists()) {
+        await signOut(auth)
+        setError('Doctor account not found.')
+        return
+      }
+
+      const doctorData = doctorSnap.data()
+
+      if (doctorData.role !== 'doctor') {
+        await signOut(auth)
+        setError('Unauthorized account access.')
+        return
+      }
+
+      if (!doctorData.mobileVerified) {
+        await signOut(auth)
+        setError(
+          'Please complete mobile verification.'
+        )
+        return
+      }
+
+      router.push('/dashboard/doctor')
+    } catch (err: any) {
+      if (
+        err.code === 'auth/user-not-found' ||
+        err.code === 'auth/wrong-password' ||
+        err.code === 'auth/invalid-credential' ||
+        err.code === 'auth/invalid-email'
+      ) {
+        setError('Invalid email or password.')
+      } else {
+        setError(err.message || 'Login failed.')
+      }
+    } finally {
+      setIsLoading(false)
     }
-
-    // 4. Get doctor document from Firestore
-    const doctorRef = doc(db, 'doctors', user.uid)
-    const doctorSnap = await getDoc(doctorRef)
-
-    // 5. Check if doctor document exists
-    if (!doctorSnap.exists()) {
-      await signOut(auth)
-      setError('Doctor account not found.')
-      return
-    }
-
-    const doctorData = doctorSnap.data()
-
-    // 6. Verify role
-    if (doctorData.role !== 'doctor') {
-      await signOut(auth)
-      setError('Unauthorized account access.')
-      return
-    }
-
-    // 7. Verify mobile number
-    if (!doctorData.mobileVerified) {
-      await signOut(auth)
-      setError('Please complete mobile verification.')
-      return
-    }
-
-    // 8. Save doctor info in Zustand store
-    const { useStore } = await import('@/lib/store')
-
-    useStore.setState({
-      currentUser: {
-        id: user.uid,
-        name:
-          doctorData.fullName ||
-          doctorData.name ||
-          'Doctor',
-        email: user.email || '',
-        role: 'doctor',
-      },
-    })
-    
-    // 9. Redirect to doctor dashboard
-    router.push('/dashboard/doctor')
-  } catch (err: any) {
-    if (
-      err.code === 'auth/user-not-found' ||
-      err.code === 'auth/wrong-password' ||
-      err.code === 'auth/invalid-credential' ||
-      err.code === 'auth/invalid-email'
-    ) {
-      setError('Invalid email or password.')
-    } else {
-      setError(err.message || 'Login failed.')
-    }
-  } finally {
-    setIsLoading(false)
   }
-}
 
   return (
     <div className="min-h-screen bg-background gradient-mesh flex items-center justify-center p-4">
