@@ -4,6 +4,20 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signOut,
+} from 'firebase/auth'
+
+import {
+  doc,
+  setDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
+
+import { auth, db } from '@/lib/firebase'
+
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 
@@ -15,10 +29,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
 
 import {
   ArrowLeft,
@@ -39,7 +51,6 @@ export default function AdminRegisterPage() {
     name: '',
     hospitalName: '',
     email: '',
-    emailOtp: '',
     password: '',
     confirmPassword: '',
     termsAccepted: false,
@@ -49,16 +60,91 @@ export default function AdminRegisterPage() {
   // =========================
   // UI STATE
   // =========================
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] =
+    useState(false)
+
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false)
 
-  const [showEmailOtp, setShowEmailOtp] = useState(false)
-  const [emailVerified, setEmailVerified] = useState(false)
+  const [
+    emailVerificationSent,
+    setEmailVerificationSent,
+  ] = useState(false)
 
   const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [isLoading, setIsLoading] =
+    useState(false)
+
+  const [success, setSuccess] =
+    useState(false)
+
+  // =========================
+  // SEND EMAIL VERIFICATION
+  // =========================
+  const sendEmailVerificationLink =
+    async () => {
+      setError('')
+
+      if (!formData.email) {
+        setError('Please enter email')
+        return
+      }
+
+      if (!formData.password) {
+        setError('Please enter password')
+        return
+      }
+
+      if (
+        formData.password !==
+        formData.confirmPassword
+      ) {
+        setError('Passwords do not match')
+        return
+      }
+
+      if (formData.password.length < 6) {
+        setError(
+          'Password must be at least 6 characters'
+        )
+        return
+      }
+
+      setIsLoading(true)
+
+      try {
+        const userCredential =
+          await createUserWithEmailAndPassword(
+            auth,
+            formData.email.trim(),
+            formData.password
+          )
+
+        await sendEmailVerification(
+          userCredential.user
+        )
+
+        setEmailVerificationSent(true)
+      } catch (err: any) {
+        console.error(err)
+
+        if (
+          err.code ===
+          'auth/email-already-in-use'
+        ) {
+          setError(
+            'Email already registered'
+          )
+        } else {
+          setError(
+            err.message ||
+              'Failed to send verification email'
+          )
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
   // =========================
   // HANDLE SUBMIT
@@ -67,68 +153,100 @@ export default function AdminRegisterPage() {
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault()
+
     setError('')
 
-    // Validate email verification
-    if (!emailVerified) {
-      setError('Please verify your email address')
+    if (!emailVerificationSent) {
+      setError(
+        'Please verify your email first'
+      )
       return
     }
 
-    // Validate passwords
-    if (formData.password !== formData.confirmPassword) {
+    if (
+      formData.password !==
+      formData.confirmPassword
+    ) {
       setError('Passwords do not match')
       return
     }
 
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long')
+    if (formData.password.length < 6) {
+      setError(
+        'Password must be at least 6 characters'
+      )
       return
     }
 
-    // Validate checkboxes
     if (!formData.termsAccepted) {
-      setError('Please accept the Terms & Conditions')
+      setError(
+        'Please accept the Terms & Conditions'
+      )
       return
     }
 
     if (!formData.privacyAccepted) {
-      setError('Please accept the Privacy Policy')
+      setError(
+        'Please accept the Privacy Policy'
+      )
+      return
+    }
+
+    if (!auth.currentUser) {
+      setError(
+        'Authentication session missing'
+      )
       return
     }
 
     setIsLoading(true)
 
     try {
-      // ============================================
-      // TODO: SAVE TO FIRESTORE USERS COLLECTION
-      // ============================================
-      /*
-      {
-        fullName: formData.name,
-        hospitalName: formData.hospitalName,
-        email: formData.email,
-        emailVerified: true,
-        role: 'admin',
-        status: 'approved',
-        createdAt: serverTimestamp()
-      }
-      */
+      await auth.currentUser.reload()
 
-      // Simulate API delay
-      await new Promise((resolve) =>
-        setTimeout(resolve, 2000)
+      if (!auth.currentUser.emailVerified) {
+        setError(
+          'Please verify your email from inbox'
+        )
+        return
+      }
+
+      // =========================
+      // SAVE ADMIN TO FIRESTORE
+      // =========================
+      await setDoc(
+        doc(
+          db,
+          'admins',
+          auth.currentUser.uid
+        ),
+        {
+          uid: auth.currentUser.uid,
+          role: 'admin',
+          fullName: formData.name,
+          hospitalName:
+            formData.hospitalName,
+          email: formData.email,
+          emailVerified: true,
+          status: 'approved',
+          createdAt: serverTimestamp(),
+        }
       )
 
-      // Show success screen
       setSuccess(true)
 
-      // Redirect to admin login page
-      setTimeout(() => {
+      setTimeout(async () => {
+        await signOut(auth)
+
         router.push('/auth/admin/login')
       }, 2500)
-    } catch (err) {
-      setError('Registration failed. Please try again.')
+    } catch (err: any) {
+      console.error(err)
+
+      setError(
+        err.message ||
+          'Registration failed'
+      )
     } finally {
       setIsLoading(false)
     }
@@ -151,8 +269,8 @@ export default function AdminRegisterPage() {
             </h2>
 
             <p className="text-muted-foreground mb-4">
-              Your administrator account has been created
-              successfully.
+              Your administrator account has
+              been created successfully.
             </p>
 
             <p className="text-sm text-muted-foreground">
@@ -164,13 +282,11 @@ export default function AdminRegisterPage() {
     )
   }
 
-
   // =========================
   // MAIN PAGE
   // =========================
   return (
     <div className="min-h-screen bg-background gradient-mesh flex items-center justify-center p-4">
-      {/* max-w-2xl keeps the form wider so it fits in one page */}
       <div className="w-full max-w-2xl">
         {/* Back Link */}
         <Link
@@ -190,8 +306,6 @@ export default function AdminRegisterPage() {
               </div>
             </div>
 
-
-
             <CardTitle className="text-3xl font-bold">
               Admin Registration
             </CardTitle>
@@ -207,7 +321,7 @@ export default function AdminRegisterPage() {
               className="space-y-6"
             >
               {/* ========================= */}
-              {/* ADMINISTRATIVE INFORMATION */}
+              {/* ADMIN INFO */}
               {/* ========================= */}
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -218,7 +332,10 @@ export default function AdminRegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Full Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">
+                    Full Name
+                  </Label>
+
                   <Input
                     id="name"
                     placeholder="Sayan Bag"
@@ -233,19 +350,24 @@ export default function AdminRegisterPage() {
                   />
                 </div>
 
-                {/* Hospital Name */}
+                {/* Hospital */}
                 <div className="space-y-2">
                   <Label htmlFor="hospitalName">
-                    Hospital / Organization Name
+                    Hospital / Organization
+                    Name
                   </Label>
+
                   <Input
                     id="hospitalName"
                     placeholder="Apollo Hospital Kolkata"
-                    value={formData.hospitalName}
+                    value={
+                      formData.hospitalName
+                    }
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        hospitalName: e.target.value,
+                        hospitalName:
+                          e.target.value,
                       })
                     }
                     required
@@ -262,7 +384,6 @@ export default function AdminRegisterPage() {
                 </h3>
               </div>
 
-              {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">
                   Official Email Address
@@ -274,58 +395,39 @@ export default function AdminRegisterPage() {
                     type="email"
                     placeholder="admin@hospital.com"
                     value={formData.email}
-                    onChange={(e) => {
+                    onChange={(e) =>
                       setFormData({
                         ...formData,
                         email: e.target.value,
                       })
-                      setEmailVerified(false)
-                    }}
+                    }
                     required
                   />
 
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setShowEmailOtp(true)}
-                    disabled={!formData.email}
+                    className="shrink-0"
+                    onClick={
+                      sendEmailVerificationLink
+                    }
+                    disabled={
+                      !formData.email ||
+                      !formData.password ||
+                      !formData.confirmPassword ||
+                      emailVerificationSent ||
+                      isLoading
+                    }
                   >
-                    {showEmailOtp
-                      ? 'Resend OTP'
-                      : 'Send OTP'}
+                    {emailVerificationSent
+                      ? '✓ Verification Sent'
+                      : 'Verify Email'}
                   </Button>
                 </div>
 
-                {/* OTP field appears only after clicking Send OTP */}
-                {showEmailOtp && (
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter Email OTP"
-                      value={formData.emailOtp}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          emailOtp: e.target.value,
-                        })
-                      }
-                    />
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() =>
-                        setEmailVerified(true)
-                      }
-                    >
-                      Verify
-                    </Button>
-                  </div>
-                )}
-
-                {/* Verification message */}
-                {emailVerified && (
+                {emailVerificationSent && (
                   <p className="text-sm text-green-600 font-medium">
-                    Email verified ✓
+                    Verification email sent ✓
                   </p>
                 )}
               </div>
@@ -359,7 +461,8 @@ export default function AdminRegisterPage() {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          password: e.target.value,
+                          password:
+                            e.target.value,
                         })
                       }
                       required
@@ -368,9 +471,11 @@ export default function AdminRegisterPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setShowPassword(!showPassword)
+                        setShowPassword(
+                          !showPassword
+                        )
                       }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -416,7 +521,7 @@ export default function AdminRegisterPage() {
                           !showConfirmPassword
                         )
                       }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -429,7 +534,7 @@ export default function AdminRegisterPage() {
               </div>
 
               {/* ========================= */}
-              {/* LEGAL AGREEMENT */}
+              {/* LEGAL */}
               {/* ========================= */}
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -453,6 +558,7 @@ export default function AdminRegisterPage() {
                     }
                     className="mt-1"
                   />
+
                   <span>
                     I agree to the Terms &
                     Conditions
@@ -474,6 +580,7 @@ export default function AdminRegisterPage() {
                     }
                     className="mt-1"
                   />
+
                   <span>
                     I agree to the Privacy
                     Policy
@@ -481,14 +588,14 @@ export default function AdminRegisterPage() {
                 </label>
               </div>
 
-              {/* Error Message */}
+              {/* Error */}
               {error && (
-                <p className="text-sm text-destructive font-medium">
+                <p className="text-sm text-red-600 font-medium">
                   {error}
                 </p>
               )}
 
-              {/* Submit Button */}
+              {/* Submit */}
               <Button
                 type="submit"
                 className="w-full bg-accent hover:bg-accent/90"
@@ -505,11 +612,12 @@ export default function AdminRegisterPage() {
               </Button>
             </form>
 
-            {/* Sign In Link */}
+            {/* Login */}
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">
                 Already have an account?{' '}
               </span>
+
               <Link
                 href="/auth/admin/login"
                 className="text-accent hover:underline font-medium"
