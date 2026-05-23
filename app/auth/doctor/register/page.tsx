@@ -19,10 +19,16 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 
-import { auth , db } from '@/lib/firebase'
+/*
+  IMPORTANT:
+  auth     -> Email/Password Auth
+  otpAuth  -> Phone OTP Auth
+*/
+import { auth, db, otpAuth } from '@/lib/firebase'
 
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
+
 import {
   Card,
   CardContent,
@@ -30,7 +36,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+
 import { Input } from '@/components/ui/input'
+
 import {
   Select,
   SelectContent,
@@ -99,124 +107,292 @@ export default function DoctorRegisterPage() {
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [otpSent, setOtpSent] = useState(false)
   const [success, setSuccess] = useState(false)
 
+  /*
+    FIXED reCAPTCHA
+  */
   useEffect(() => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        'recaptcha-container',
-        {
-          size: 'invisible',
-        }
-      )
+    try {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear()
+        window.recaptchaVerifier = undefined
+      }
 
-      window.recaptchaVerifier.render()
+      window.recaptchaVerifier =
+        new RecaptchaVerifier(
+          otpAuth,
+          'recaptcha-container',
+          {
+            size: 'invisible',
+            callback: () => {
+              console.log('reCAPTCHA verified')
+            },
+            'expired-callback': () => {
+              console.log('reCAPTCHA expired')
+
+              setError(
+                'reCAPTCHA expired. Please try again.'
+              )
+
+              window.recaptchaVerifier =
+                undefined
+            },
+          }
+        )
+
+      console.log(
+        'reCAPTCHA initialized successfully'
+      )
+    } catch (error) {
+      console.error(
+        'reCAPTCHA init error:',
+        error
+      )
+    }
+
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear()
+        window.recaptchaVerifier = undefined
+      }
     }
   }, [])
 
+  /*
+    SEND OTP
+  */
   const sendMobileOtp = async () => {
     setError('')
     setInfo('')
 
     try {
-      if (!/^[0-9]{10}$/.test(formData.mobile)) {
-        setError('Enter a valid 10-digit mobile number.')
+      const phone = formData.mobile.trim()
+
+      if (!/^[0-9]{10}$/.test(phone)) {
+        setError(
+          'Enter valid 10-digit mobile number'
+        )
         return
       }
 
+      /*
+        Recreate verifier if missing
+      */
       if (!window.recaptchaVerifier) {
-        setError('reCAPTCHA not initialized.')
-        return
+        window.recaptchaVerifier =
+          new RecaptchaVerifier(
+            otpAuth,
+            'recaptcha-container',
+            {
+              size: 'invisible',
+            }
+          )
       }
+
+      setIsLoading(true)
 
       const confirmation =
         await signInWithPhoneNumber(
-          auth,
-          `+91${formData.mobile}`,
+          otpAuth,
+          `+91${phone}`,
           window.recaptchaVerifier
         )
 
       setConfirmationResult(confirmation)
-      setInfo('OTP sent successfully.')
+      setOtpSent(true)
+
+      setInfo('OTP sent successfully')
     } catch (err: any) {
-      console.error(err)
-      setError(err.message || 'Failed to send OTP.')
-    }
-  }
+      console.error('OTP Error:', err)
 
-  const verifyMobileOtp = async () => {
-    setError('')
-    setInfo('')
-
-    try {
-      if (!confirmationResult) {
-        setError('Please send OTP first.')
-        return
-      }
-
-      await confirmationResult.confirm(formData.mobileOtp)
-
-      setMobileVerified(true)
-      setInfo('Mobile verified successfully.')
-
-      await signOut(auth)
-    } catch {
-      setError('Invalid OTP.')
-    }
-  }
-
-  const sendEmailVerificationLink = async () => {
-    setError('')
-    setInfo('')
-
-    try {
-      if (!mobileVerified) {
-        setError('Verify mobile number first.')
-        return
-      }
-
-      if (!formData.email) {
-        setError('Enter email address.')
-        return
-      }
-
-      if (!formData.password) {
-        setError('Enter password.')
-        return
+      /*
+        Reset bad verifier
+      */
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear()
+        window.recaptchaVerifier = undefined
       }
 
       if (
-        formData.password !== formData.confirmPassword
+        err.code === 'auth/invalid-phone-number'
       ) {
-        setError('Passwords do not match.')
-        return
-      }
-
-      const userCredential =
-        await createUserWithEmailAndPassword(
-          auth,
-          formData.email.trim(),
-          formData.password
+        setError('Invalid phone number')
+      } else if (
+        err.code === 'auth/too-many-requests'
+      ) {
+        setError(
+          'Too many requests. Try again later.'
         )
-
-      await sendEmailVerification(
-        userCredential.user
-      )
-
-      setEmailVerificationSent(true)
-
-      setInfo(
-        'Verification email sent. Verify your email, then click Create Account.'
-      )
-    } catch (err: any) {
-      setError(
-        err.message ||
-          'Failed to send verification email.'
-      )
+      } else if (
+        err.code ===
+        'auth/operation-not-allowed'
+      ) {
+        setError(
+          'Phone Authentication is not enabled in Firebase.'
+        )
+      } else if (
+        err.code ===
+        'auth/invalid-app-credential'
+      ) {
+        setError(
+          'Invalid app credential. Check Firebase Phone Auth + Authorized Domains.'
+        )
+      } else {
+        setError(
+          err.message || 'Failed to send OTP'
+        )
+      }
+    } finally {
+      setIsLoading(false)
     }
   }
 
+  /*
+    VERIFY OTP
+  */
+  const verifyMobileOtp = async () => {
+    try {
+      setError('')
+      setInfo('')
+
+      if (!confirmationResult) {
+        setError('Send OTP first')
+        return
+      }
+
+      if (!formData.mobileOtp.trim()) {
+        setError('Enter OTP')
+        return
+      }
+
+      setIsLoading(true)
+
+      await confirmationResult.confirm(
+        formData.mobileOtp
+      )
+
+      setMobileVerified(true)
+
+      setInfo('Mobile verified successfully')
+
+      /*
+        IMPORTANT:
+        REMOVED THIS:
+        await signOut(auth)
+
+        It was breaking auth session
+      */
+    } catch (err: any) {
+      console.error(err)
+
+      if (
+        err.code ===
+        'auth/invalid-verification-code'
+      ) {
+        setError('Invalid OTP')
+      } else if (
+        err.code === 'auth/code-expired'
+      ) {
+        setError(
+          'OTP expired. Please resend OTP.'
+        )
+      } else {
+        setError(
+          err.message || 'OTP verification failed'
+        )
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  /*
+    SEND EMAIL VERIFICATION
+  */
+  const sendEmailVerificationLink =
+    async () => {
+      setError('')
+      setInfo('')
+
+      try {
+        if (!mobileVerified) {
+          setError(
+            'Verify mobile number first.'
+          )
+          return
+        }
+
+        if (!formData.email) {
+          setError('Enter email address.')
+          return
+        }
+
+        if (!formData.password) {
+          setError('Enter password.')
+          return
+        }
+
+        if (
+          formData.password.length < 6
+        ) {
+          setError(
+            'Password must be at least 6 characters.'
+          )
+          return
+        }
+
+        if (
+          formData.password !==
+          formData.confirmPassword
+        ) {
+          setError('Passwords do not match.')
+          return
+        }
+
+        setIsLoading(true)
+
+        const userCredential =
+          await createUserWithEmailAndPassword(
+            auth,
+            formData.email.trim(),
+            formData.password
+          )
+
+        await sendEmailVerification(
+          userCredential.user
+        )
+
+        setEmailVerificationSent(true)
+
+        setInfo(
+          'Verification email sent. Verify your email, then click Create Account.'
+        )
+      } catch (err: any) {
+        console.error(err)
+
+        if (
+          err.code ===
+          'auth/email-already-in-use'
+        ) {
+          setError(
+            'Email already registered.'
+          )
+        } else {
+          setError(
+            err.message ||
+              'Failed to send verification email.'
+          )
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+  /*
+    FINAL SUBMIT
+  */
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
@@ -228,37 +404,51 @@ export default function DoctorRegisterPage() {
 
     try {
       if (!mobileVerified) {
-        setError('Complete mobile verification.')
+        setError(
+          'Complete mobile verification.'
+        )
         return
       }
 
       if (!emailVerificationSent) {
-        setError('Send email verification first.')
+        setError(
+          'Send email verification first.'
+        )
         return
       }
 
       if (!auth.currentUser) {
-        setError('Authentication session missing.')
+        setError(
+          'Authentication session missing.'
+        )
         return
       }
 
       await auth.currentUser.reload()
 
       if (!auth.currentUser.emailVerified) {
-        setError('Please verify your email first.')
+        setError(
+          'Please verify your email first.'
+        )
         return
       }
 
       await setDoc(
-        doc(db, 'doctors', auth.currentUser.uid),
+        doc(
+          db,
+          'doctors',
+          auth.currentUser.uid
+        ),
         {
           uid: auth.currentUser.uid,
           role: 'doctor',
           fullName: formData.name,
-          licenseNumber: formData.licenseNumber,
+          licenseNumber:
+            formData.licenseNumber,
           specialization:
             formData.specialization,
-          hospitalName: formData.hospitalName,
+          hospitalName:
+            formData.hospitalName,
           mobile: formData.mobile,
           email: formData.email,
           mobileVerified: true,
@@ -271,24 +461,37 @@ export default function DoctorRegisterPage() {
 
       setTimeout(async () => {
         await signOut(auth)
-        router.push('/auth/doctor/login')
+
+        router.push(
+          '/auth/doctor/login'
+        )
       }, 3000)
     } catch (err: any) {
-      setError(err.message || 'Registration failed.')
+      console.error(err)
+
+      setError(
+        err.message ||
+          'Registration failed.'
+      )
     } finally {
       setIsLoading(false)
     }
   }
 
+  /*
+    SUCCESS SCREEN
+  */
   if (success) {
     return (
       <div className="min-h-screen bg-background gradient-mesh flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center shadow-xl">
           <CardContent className="pt-10">
             <CheckCircle className="h-16 w-16 mx-auto text-green-600 mb-4" />
+
             <h2 className="text-2xl font-bold">
               Registration Successful
             </h2>
+
             <p className="text-muted-foreground mt-2">
               Redirecting to login...
             </p>
@@ -301,6 +504,7 @@ export default function DoctorRegisterPage() {
   return (
     <div className="min-h-screen bg-background gradient-mesh flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
+
         <Link
           href="/"
           className="inline-flex items-center mb-6"
@@ -325,10 +529,12 @@ export default function DoctorRegisterPage() {
           </CardHeader>
 
           <CardContent>
+
             <form
               onSubmit={handleSubmit}
               className="space-y-5"
             >
+
               <Input
                 placeholder="Full Name"
                 required
@@ -390,10 +596,13 @@ export default function DoctorRegisterPage() {
                 }
               />
 
+              {/* MOBILE OTP */}
+
               <div className="flex gap-2">
                 <Input
                   placeholder="Mobile Number"
                   value={formData.mobile}
+                  disabled={mobileVerified}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -401,33 +610,56 @@ export default function DoctorRegisterPage() {
                     })
                   }
                 />
+
                 <Button
                   type="button"
                   onClick={sendMobileOtp}
+                  disabled={
+                    isLoading ||
+                    mobileVerified
+                  }
                 >
-                  Send OTP
+                  {otpSent
+                    ? 'Resend OTP'
+                    : 'Send OTP'}
                 </Button>
               </div>
 
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Enter OTP"
-                  value={formData.mobileOtp}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      mobileOtp:
-                        e.target.value,
-                    })
-                  }
-                />
-                <Button
-                  type="button"
-                  onClick={verifyMobileOtp}
-                >
-                  Verify OTP
-                </Button>
-              </div>
+              {otpSent &&
+                !mobileVerified && (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter OTP"
+                      value={
+                        formData.mobileOtp
+                      }
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          mobileOtp:
+                            e.target.value,
+                        })
+                      }
+                    />
+
+                    <Button
+                      type="button"
+                      onClick={
+                        verifyMobileOtp
+                      }
+                    >
+                      Verify OTP
+                    </Button>
+                  </div>
+                )}
+
+              {mobileVerified && (
+                <p className="text-green-600 text-sm">
+                  ✓ Mobile verified
+                </p>
+              )}
+
+              {/* EMAIL */}
 
               <Input
                 type="email"
@@ -441,6 +673,8 @@ export default function DoctorRegisterPage() {
                   })
                 }
               />
+
+              {/* PASSWORD */}
 
               <div className="relative">
                 <Input
@@ -460,10 +694,13 @@ export default function DoctorRegisterPage() {
                     })
                   }
                 />
+
                 <button
                   type="button"
                   onClick={() =>
-                    setShowPassword(!showPassword)
+                    setShowPassword(
+                      !showPassword
+                    )
                   }
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
@@ -484,7 +721,9 @@ export default function DoctorRegisterPage() {
                   }
                   placeholder="Confirm Password"
                   required
-                  value={formData.confirmPassword}
+                  value={
+                    formData.confirmPassword
+                  }
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -493,6 +732,7 @@ export default function DoctorRegisterPage() {
                     })
                   }
                 />
+
                 <button
                   type="button"
                   onClick={() =>
@@ -510,14 +750,24 @@ export default function DoctorRegisterPage() {
                 </button>
               </div>
 
+              {/* EMAIL VERIFICATION */}
+
               <Button
                 type="button"
                 variant="outline"
-                onClick={sendEmailVerificationLink}
+                onClick={
+                  sendEmailVerificationLink
+                }
                 className="w-full"
+                disabled={
+                  !mobileVerified ||
+                  isLoading
+                }
               >
                 Send Email Verification
               </Button>
+
+              {/* MESSAGES */}
 
               {error && (
                 <p className="text-red-600 text-sm">
@@ -530,6 +780,8 @@ export default function DoctorRegisterPage() {
                   {info}
                 </p>
               )}
+
+              {/* SUBMIT */}
 
               <Button
                 type="submit"
@@ -546,7 +798,6 @@ export default function DoctorRegisterPage() {
                 )}
               </Button>
 
-              <div id="recaptcha-container"></div>
             </form>
 
             <div className="mt-6 text-center">
@@ -557,12 +808,18 @@ export default function DoctorRegisterPage() {
                 Already have an account? Sign In
               </Link>
             </div>
+
           </CardContent>
+
+          {/* REQUIRED */}
+          <div id="recaptcha-container"></div>
+
         </Card>
 
         <div className="mt-6 flex justify-center">
           <Logo size="sm" />
         </div>
+
       </div>
     </div>
   )
