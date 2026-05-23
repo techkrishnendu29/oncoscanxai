@@ -49,11 +49,21 @@ export function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/')
-    }
-  }, [isAuthenticated, router])
+ const [hydrated, setHydrated] =
+  useState(false)
+
+useEffect(() => {
+  setHydrated(true)
+}, [])
+
+useEffect(() => {
+  if (
+    hydrated &&
+    !isAuthenticated
+  ) {
+    router.push('/')
+  }
+}, [hydrated, isAuthenticated, router])
 
   const handleLogout = () => {
     logout()
@@ -188,9 +198,13 @@ const adminNavItems = [
       ? 'text-accent'
       : 'text-muted-foreground'
 
-  if (!isAuthenticated || !currentUser) {
-    return null
-  }
+ if (!hydrated) {
+  return null
+}
+
+if (!isAuthenticated || !currentUser) {
+  return null
+}
 
   return (
     <div className="min-h-screen bg-background">
