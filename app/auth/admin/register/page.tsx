@@ -1,0 +1,530 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+
+import { Logo } from '@/components/logo'
+import { Button } from '@/components/ui/button'
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+
+
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
+
+import {
+  ArrowLeft,
+  Shield,
+  Eye,
+  EyeOff,
+  Loader2,
+  CheckCircle,
+} from 'lucide-react'
+
+export default function AdminRegisterPage() {
+  const router = useRouter()
+
+  // =========================
+  // FORM DATA
+  // =========================
+  const [formData, setFormData] = useState({
+    name: '',
+    hospitalName: '',
+    email: '',
+    emailOtp: '',
+    password: '',
+    confirmPassword: '',
+    termsAccepted: false,
+    privacyAccepted: false,
+  })
+
+  // =========================
+  // UI STATE
+  // =========================
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false)
+
+  const [showEmailOtp, setShowEmailOtp] = useState(false)
+  const [emailVerified, setEmailVerified] = useState(false)
+
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+
+  // =========================
+  // HANDLE SUBMIT
+  // =========================
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault()
+    setError('')
+
+    // Validate email verification
+    if (!emailVerified) {
+      setError('Please verify your email address')
+      return
+    }
+
+    // Validate passwords
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long')
+      return
+    }
+
+    // Validate checkboxes
+    if (!formData.termsAccepted) {
+      setError('Please accept the Terms & Conditions')
+      return
+    }
+
+    if (!formData.privacyAccepted) {
+      setError('Please accept the Privacy Policy')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // ============================================
+      // TODO: SAVE TO FIRESTORE USERS COLLECTION
+      // ============================================
+      /*
+      {
+        fullName: formData.name,
+        hospitalName: formData.hospitalName,
+        email: formData.email,
+        emailVerified: true,
+        role: 'admin',
+        status: 'approved',
+        createdAt: serverTimestamp()
+      }
+      */
+
+      // Simulate API delay
+      await new Promise((resolve) =>
+        setTimeout(resolve, 2000)
+      )
+
+      // Show success screen
+      setSuccess(true)
+
+      // Redirect to admin login page
+      setTimeout(() => {
+        router.push('/auth/admin/login')
+      }, 2500)
+    } catch (err) {
+      setError('Registration failed. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // =========================
+  // SUCCESS SCREEN
+  // =========================
+  if (success) {
+    return (
+      <div className="min-h-screen bg-background gradient-mesh flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-2 text-center">
+          <CardContent className="pt-12 pb-8">
+            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+
+            <h2 className="text-2xl font-bold mb-2">
+              Registration Successful!
+            </h2>
+
+            <p className="text-muted-foreground mb-4">
+              Your administrator account has been created
+              successfully.
+            </p>
+
+            <p className="text-sm text-muted-foreground">
+              Redirecting to admin login...
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+
+  // =========================
+  // MAIN PAGE
+  // =========================
+  return (
+    <div className="min-h-screen bg-background gradient-mesh flex items-center justify-center p-4">
+      {/* max-w-2xl keeps the form wider so it fits in one page */}
+      <div className="w-full max-w-2xl">
+        {/* Back Link */}
+        <Link
+          href="/"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Home
+        </Link>
+
+        {/* Registration Card */}
+        <Card className="border-2 border-accent/30 shadow-xl">
+          <CardHeader className="text-center pb-4">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center">
+                <Shield className="h-8 w-8 text-accent" />
+              </div>
+            </div>
+
+
+
+            <CardTitle className="text-3xl font-bold">
+              Admin Registration
+            </CardTitle>
+
+            <CardDescription>
+              Join OncoScanXAI Administration
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              {/* ========================= */}
+              {/* ADMINISTRATIVE INFORMATION */}
+              {/* ========================= */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  Administrative Information
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Sayan Bag"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        name: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+
+                {/* Hospital Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="hospitalName">
+                    Hospital / Organization Name
+                  </Label>
+                  <Input
+                    id="hospitalName"
+                    placeholder="Apollo Hospital Kolkata"
+                    value={formData.hospitalName}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        hospitalName: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* ========================= */}
+              {/* CONTACT VERIFICATION */}
+              {/* ========================= */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  Contact Verification
+                </h3>
+              </div>
+
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">
+                  Official Email Address
+                </Label>
+
+                <div className="flex gap-2">
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@hospital.com"
+                    value={formData.email}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        email: e.target.value,
+                      })
+                      setEmailVerified(false)
+                    }}
+                    required
+                  />
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowEmailOtp(true)}
+                    disabled={!formData.email}
+                  >
+                    {showEmailOtp
+                      ? 'Resend OTP'
+                      : 'Send OTP'}
+                  </Button>
+                </div>
+
+                {/* OTP field appears only after clicking Send OTP */}
+                {showEmailOtp && (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter Email OTP"
+                      value={formData.emailOtp}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          emailOtp: e.target.value,
+                        })
+                      }
+                    />
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        setEmailVerified(true)
+                      }
+                    >
+                      Verify
+                    </Button>
+                  </div>
+                )}
+
+                {/* Verification message */}
+                {emailVerified && (
+                  <p className="text-sm text-green-600 font-medium">
+                    Email verified ✓
+                  </p>
+                )}
+              </div>
+
+              {/* ========================= */}
+              {/* SECURITY */}
+              {/* ========================= */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  Security
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="password">
+                    Password
+                  </Label>
+
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={
+                        showPassword
+                          ? 'text'
+                          : 'password'
+                      }
+                      placeholder="Enter a strong password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          password: e.target.value,
+                        })
+                      }
+                      required
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowPassword(!showPassword)
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirm Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">
+                    Confirm Password
+                  </Label>
+
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={
+                        showConfirmPassword
+                          ? 'text'
+                          : 'password'
+                      }
+                      placeholder="Re-enter your password"
+                      value={
+                        formData.confirmPassword
+                      }
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          confirmPassword:
+                            e.target.value,
+                        })
+                      }
+                      required
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(
+                          !showConfirmPassword
+                        )
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ========================= */}
+              {/* LEGAL AGREEMENT */}
+              {/* ========================= */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  Legal Agreement
+                </h3>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <label className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={
+                      formData.termsAccepted
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        termsAccepted:
+                          e.target.checked,
+                      })
+                    }
+                    className="mt-1"
+                  />
+                  <span>
+                    I agree to the Terms &
+                    Conditions
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={
+                      formData.privacyAccepted
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        privacyAccepted:
+                          e.target.checked,
+                      })
+                    }
+                    className="mt-1"
+                  />
+                  <span>
+                    I agree to the Privacy
+                    Policy
+                  </span>
+                </label>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <p className="text-sm text-destructive font-medium">
+                  {error}
+                </p>
+              )}
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="w-full bg-accent hover:bg-accent/90"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  'Create Admin Account'
+                )}
+              </Button>
+            </form>
+
+            {/* Sign In Link */}
+            <div className="mt-6 text-center text-sm">
+              <span className="text-muted-foreground">
+                Already have an account?{' '}
+              </span>
+              <Link
+                href="/auth/admin/login"
+                className="text-accent hover:underline font-medium"
+              >
+                Sign In
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bottom Logo */}
+        <div className="mt-8 flex justify-center">
+          <Logo size="sm" />
+        </div>
+      </div>
+    </div>
+  )
+}
