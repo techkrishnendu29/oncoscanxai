@@ -25,7 +25,7 @@ export const auth = getAuth(app)
 export const otpAuth = getAuth(otpApp)
 export const db = getFirestore(app)
 
-// Only connect to emulator in development
+
 if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FIREBASE_USE_EMULATOR === 'true') {
   try {
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true })
