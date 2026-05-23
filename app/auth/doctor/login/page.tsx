@@ -94,22 +94,21 @@ export default function DoctorLoginPage() {
     }
 
     // 8. Save doctor info in Zustand store
-    const { useStore } = await import('@/lib/store')
+  // 8. Save doctor info in Zustand store
+const { useStore } = await import('@/lib/store')
 
-    useStore.setState({
-      currentUser: {
-        id: user.uid,
-        name:
-          doctorData.fullName ||
-          doctorData.name ||
-          'Doctor',
-        email: user.email || '',
-        role: 'doctor',
-      },
-    })
-    
-    // 9. Redirect to doctor dashboard
-    router.push('/dashboard/doctor')
+useStore.getState().login({
+  id: user.uid,
+  name:
+    doctorData.fullName ||
+    doctorData.name ||
+    'Doctor',
+  email: user.email || '',
+  role: 'doctor',
+})
+
+// 9. Redirect to doctor dashboard
+window.location.href = '/dashboard/doctor'
   } catch (err: any) {
     if (
       err.code === 'auth/user-not-found' ||
