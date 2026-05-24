@@ -374,6 +374,3 @@ export default function WelcomePage() {
       </div>
     </footer>
  </div>
-
-
-}
