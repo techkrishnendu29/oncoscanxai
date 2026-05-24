@@ -273,168 +273,107 @@ export default function WelcomePage() {
         </div>
       </main>{/* FOOTER */}
 
-{/* FOOTER */}
-<footer className="border-t border-white/10 bg-black/80 backdrop-blur-md text-white/90">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <footer className="relative border-t border-teal-500/20 bg-zinc-950 text-zinc-300 overflow-hidden">
+      {/* CATCHY SOOTHING GLOW: Adds depth and a premium AI feel */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-teal-500/10 blur-[120px] pointer-events-none" />
 
-    {/* TOP SECTION */}
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16">
+        
+        {/* TOP SECTION */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
 
-      {/* BRAND */}
-      <div>
-        <div className="mb-4">
-          <Logo size="sm" />
-        </div>
+          {/* BRAND COLUMN */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-2">
+              {/* Replace with your actual Logo component */}
+              <div className="h-8 w-8 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-lg shadow-lg shadow-teal-500/20" />
+              <span className="text-xl font-bold tracking-tight text-white">OncoScan<span className="text-teal-400">XAI</span></span>
+            </div>
 
-        <p className="text-sm text-zinc-400 leading-7">
-          OncoScanXAI is an AI-powered breast cancer
-          analysis platform designed to support
-          healthcare professionals with intelligent,
-          fast, and accurate diagnostic assistance.
-        </p>
-      </div>
-
-      {/* SUPPORT */}
-      <div>
-        <h3 className="font-semibold text-lg mb-4 text-white">
-          Support
-        </h3>
-
-        <div className="space-y-3 text-sm">
-
-          <Link
-            href="/contact"
-            className="block text-zinc-400 hover:text-pink-400 transition-colors"
-          >
-            Contact Us
-          </Link>
-
-          <Link
-            href="/support"
-            className="block text-zinc-400 hover:text-pink-400 transition-colors"
-          >
-            Help & Support
-          </Link>
-
-          <Link
-            href="/faq"
-            className="block text-zinc-400 hover:text-pink-400 transition-colors"
-          >
-            FAQ
-          </Link>
-
-        </div>
-      </div>
-
-      {/* LEGAL */}
-      <div>
-        <h3 className="font-semibold text-lg mb-4 text-white">
-          Legal
-        </h3>
-
-        <div className="space-y-3 text-sm">
-
-          <Link
-            href="/privacy-policy"
-            className="block text-zinc-400 hover:text-pink-400 transition-colors"
-          >
-            Privacy Policy
-          </Link>
-
-          <Link
-            href="/terms-and-conditions"
-            className="block text-zinc-400 hover:text-pink-400 transition-colors"
-          >
-            Terms & Conditions
-          </Link>
-
-          <Link
-            href="/cookies-policy"
-            className="block text-zinc-400 hover:text-pink-400 transition-colors"
-          >
-            Cookies Policy
-          </Link>
-
-        </div>
-      </div>
-
-      {/* DEVELOPMENT TEAM */}
-      <div>
-
-        <h3 className="font-semibold text-lg mb-4 text-white">
-          Developer Info
-        </h3>
-
-        <div className="space-y-5 text-sm">
-          {/* Sayan */}
-          <div>
-            <p className="font-medium text-white">
-              Sayan Bag
-            </p>
-          </div>
-          {/* Santanu */}
-          <div>
-            <p className="font-medium text-white">
-              Santanu Pratihar
+            <p className="text-sm leading-relaxed text-zinc-400 max-w-xs">
+              Empowering healthcare professionals with AI-driven insights for 
+              faster, more accurate breast cancer diagnostic assistance.
             </p>
           </div>
 
-          {/* Krishnendu */}
+          {/* SUPPORT COLUMN */}
           <div>
-            <p className="font-medium text-white">
-              Krishnendu Ghosh
-            </p>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white mb-6">
+              Resources
+            </h3>
+            <ul className="space-y-4 text-sm">
+              <li>
+                <Link href="/contact" className="hover:text-teal-400 transition-colors duration-200">Contact Us</Link>
+              </li>
+              <li>
+                <Link href="/support" className="hover:text-teal-400 transition-colors duration-200">Help & Support</Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-teal-400 transition-colors duration-200">Frequently Asked Questions</Link>
+              </li>
+            </ul>
           </div>
 
-          <Link
-            href="mailto:support@krishnendughosh.in"
-            className="block text-zinc-400 hover:text-pink-400 transition-colors"
-          >
-            support@krishnendughosh.in
-          </Link>
+          {/* LEGAL COLUMN */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white mb-6">
+              Legal
+            </h3>
+            <ul className="space-y-4 text-sm">
+              <li>
+                <Link href="/privacy-policy" className="hover:text-teal-400 transition-colors duration-200">Privacy Policy</Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-teal-400 transition-colors duration-200">Terms of Service</Link>
+              </li>
+              <li>
+                <Link href="/cookies" className="hover:text-teal-400 transition-colors duration-200">Cookie Settings</Link>
+              </li>
+            </ul>
+          </div>
 
+          {/* DEVELOPER TEAM COLUMN */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white mb-6">
+              The Team
+            </h3>
+            <div className="space-y-4">
+              <div className="group">
+                <p className="text-sm font-medium text-zinc-200 group-hover:text-teal-400 transition-colors">Sayan Bag</p>
+              </div>
+              <div className="group">
+                <p className="text-sm font-medium text-zinc-200 group-hover:text-teal-400 transition-colors">Santanu Pratihar</p>
+              </div>
+              <div className="group">
+                <p className="text-sm font-medium text-zinc-200 group-hover:text-teal-400 transition-colors">Krishnendu Ghosh</p>
+              </div>
+              <a 
+                href="mailto:support@krishnendughosh.in" 
+                className="inline-block mt-2 text-xs font-medium px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-teal-400 hover:border-teal-500/50 transition-all"
+              >
+                support@krishnendughosh.in
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* BOTTOM SECTION */}
+        <div className="mt-16 pt-8 border-t border-zinc-900 flex flex-col sm:flex-row justify-between items-center gap-6">
+          <p className="text-xs text-zinc-500">
+            © {new Date().getFullYear()} OncoScanXAI. Precision in every pixel.
+          </p>
+          
+          <div className="flex items-center gap-8">
+            {/* Simple social icons or status indicator */}
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">System Operational</span>
+            </div>
+          </div>
         </div>
       </div>
+    </footer>
+ </div>
 
-    </div>
 
-    {/* BOTTOM SECTION */}
-    <div className="mt-12 pt-6 border-t border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4">
-
-      <p className="text-sm text-zinc-500">
-        © 2026 OncoScanXAI. All rights reserved.
-      </p>
-
-      <div className="flex items-center gap-6 text-sm">
-
-        <Link
-          href="/privacy-policy"
-          className="text-zinc-400 hover:text-pink-400 transition-colors"
-        >
-          Privacy
-        </Link>
-
-        <Link
-          href="/terms-and-conditions"
-          className="text-zinc-400 hover:text-pink-400 transition-colors"
-        >
-          Terms
-        </Link>
-
-        <Link
-          href="/contact"
-          className="text-zinc-400 hover:text-pink-400 transition-colors"
-        >
-          Contact
-        </Link>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</footer>
-</div>
-  )
 }
