@@ -1,138 +1,356 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
+
+import {
+  doc,
+  getDoc,
+} from 'firebase/firestore'
+
+import { auth, db } from '@/lib/firebase'
+
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useStore, demoCredentials } from '@/lib/store'
-import { ArrowLeft, Shield, Eye, EyeOff, Loader2 } from 'lucide-react'
+
+import {
+  ArrowLeft,
+  Shield,
+  Eye,
+  EyeOff,
+  Loader2,
+} from 'lucide-react'
 
 export default function AdminLoginPage() {
-  const router = useRouter()
-  const login = useStore(state => state.login)
-  
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] =
+    useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [password, setPassword] =
+    useState('')
+
+  const [showPassword, setShowPassword] =
+    useState(false)
+
+  const [error, setError] =
+    useState('')
+
+  const [isLoading, setIsLoading] =
+    useState(false)
+
+  const handleSubmit = async (
+    e: React.FormEvent
+  ) => {
     e.preventDefault()
+
     setError('')
     setIsLoading(true)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    try {
+      // =========================
+      // FIREBASE LOGIN
+      // =========================
+      const userCredential =
+        await signInWithEmailAndPassword(
+          auth,
+          email.trim(),
+          password
+        )
 
-    if (email === demoCredentials.admin.email && password === demoCredentials.admin.password) {
-      login({
-        id: 'a1',
-        name: demoCredentials.admin.name,
-        email: demoCredentials.admin.email,
-        role: 'admin'
+      const user =
+        userCredential.user
+
+      // =========================
+      // RELOAD USER
+      // =========================
+      await user.reload()
+
+      // =========================
+      // VERIFY EMAIL
+      // =========================
+      if (!user.emailVerified) {
+        await signOut(auth)
+
+        setError(
+          'Please verify your email before logging in.'
+        )
+
+        return
+      }
+
+      // =========================
+      // GET ADMIN FROM FIRESTORE
+      // =========================
+      const adminRef = doc(
+        db,
+        'admins',
+        user.uid
+      )
+
+      const adminSnap =
+        await getDoc(adminRef)
+
+      // =========================
+      // CHECK ADMIN EXISTS
+      // =========================
+      if (!adminSnap.exists()) {
+        await signOut(auth)
+
+        setError(
+          'Admin account not found.'
+        )
+
+        return
+      }
+
+      const adminData =
+        adminSnap.data()
+
+      // =========================
+      // VERIFY ROLE
+      // =========================
+      if (
+        adminData.role !== 'admin'
+      ) {
+        await signOut(auth)
+
+        setError(
+          'Unauthorized account access.'
+        )
+
+        return
+      }
+
+      // =========================
+      // VERIFY STATUS
+      // =========================
+      if (
+        adminData.status !==
+        'approved'
+      ) {
+        await signOut(auth)
+
+        setError(
+          'Admin account is not approved.'
+        )
+
+        return
+      }
+
+      // =========================
+      // SAVE TO ZUSTAND
+      // =========================
+      const { useStore } =
+        await import('@/lib/store')
+
+      useStore.getState().login({
+        id: user.uid,
+        name:
+          adminData.fullName ||
+          adminData.name ||
+          'Admin',
+        email:
+          user.email || '',
+        role: 'admin',
       })
-      router.push('/dashboard/admin')
-    } else {
-      setError('Invalid email or password. Please try again.')
+
+      // =========================
+      // REDIRECT
+      // =========================
+      window.location.href =
+        '/dashboard/admin'
+    } catch (err: any) {
+      console.error(err)
+
+      if (
+        err.code ===
+          'auth/user-not-found' ||
+        err.code ===
+          'auth/wrong-password' ||
+        err.code ===
+          'auth/invalid-credential' ||
+        err.code ===
+          'auth/invalid-email'
+      ) {
+        setError(
+          'Invalid email or password.'
+        )
+      } else {
+        setError(
+          err.message ||
+            'Login failed.'
+        )
+      }
+    } finally {
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
   return (
     <div className="min-h-screen bg-background gradient-mesh flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8">
+
+        <Link
+          href="/"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Home
         </Link>
 
-        <Card className="border-2 border-accent/30">
-          <CardHeader className="text-center pb-2">
+        <Card className="border-2 border-accent/30 shadow-xl rounded-3xl">
+
+          <CardHeader className="text-center pb-4">
+
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center">
                 <Shield className="h-8 w-8 text-accent" />
               </div>
             </div>
-            <CardTitle className="text-2xl">Admin Login</CardTitle>
+
+            <CardTitle className="text-2xl font-bold">
+              Admin Login
+            </CardTitle>
+
             <CardDescription>
-              Sign in to access the admin portal
+              Sign in to your verified admin account
             </CardDescription>
+
           </CardHeader>
+
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5"
+            >
+
+              {/* EMAIL */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                  Email Address
+                </Label>
+
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@oncoscanxai.com"
+                  placeholder="admin@hospital.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) =>
+                    setEmail(
+                      e.target.value
+                    )
+                  }
                   required
                 />
               </div>
-              
+
+              {/* PASSWORD */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+
+                <Label htmlFor="password">
+                  Password
+                </Label>
+
                 <div className="relative">
+
                   <Input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
+                    type={
+                      showPassword
+                        ? 'text'
+                        : 'password'
+                    }
+                    placeholder="Enter password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) =>
+                      setPassword(
+                        e.target.value
+                      )
+                    }
                     required
                   />
+
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    onClick={() =>
+                      setShowPassword(
+                        !showPassword
+                      )
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
+
                 </div>
               </div>
 
+              {/* ERROR */}
               {error && (
-                <p className="text-sm text-destructive">{error}</p>
+                <p className="text-sm text-red-600 font-medium">
+                  {error}
+                </p>
               )}
 
-              <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={isLoading}>
+              {/* BUTTON */}
+              <Button
+                type="submit"
+                className="w-full h-11 rounded-xl bg-accent hover:bg-accent/90"
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    Signing In...
                   </>
                 ) : (
                   'Sign In'
                 )}
               </Button>
+
             </form>
 
+            {/* REGISTER */}
             <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">{"Don't have an account?"} </span>
-              <Link href="/auth/admin/register" className="text-accent hover:underline font-medium">
+
+              <span className="text-muted-foreground">
+                Don&apos;t have an account?{' '}
+              </span>
+
+              <Link
+                href="/auth/admin/register"
+                className="text-accent hover:underline font-medium"
+              >
                 Register here
               </Link>
+
             </div>
 
-            <div className="mt-4 p-3 bg-accent/5 rounded-lg text-xs text-muted-foreground border border-accent/20">
-              <p className="font-medium text-foreground mb-1">Demo Credentials:</p>
-              <p>Email: admin@oncoscanxai.com</p>
-              <p>Password: admin123</p>
-            </div>
           </CardContent>
         </Card>
 
+        {/* LOGO */}
         <div className="mt-8 flex justify-center">
           <Logo size="sm" />
         </div>
+
       </div>
     </div>
   )

@@ -72,6 +72,7 @@ export default function AdminRegisterPage() {
   ] = useState(false)
 
   const [error, setError] = useState('')
+  const [info, setInfo] = useState('')
   const [isLoading, setIsLoading] =
     useState(false)
 
@@ -81,17 +82,30 @@ export default function AdminRegisterPage() {
   // =========================
   // SEND EMAIL VERIFICATION
   // =========================
-  const sendEmailVerificationLink =
-    async () => {
-      setError('')
+ const sendEmailVerificationLink =
+  async () => {
+    setError('')
+    setInfo('')
 
+    try {
       if (!formData.email) {
-        setError('Please enter email')
+        setError(
+          'Enter email address.'
+        )
         return
       }
 
       if (!formData.password) {
-        setError('Please enter password')
+        setError('Enter password.')
+        return
+      }
+
+      if (
+        formData.password.length < 6
+      ) {
+        setError(
+          'Password must be at least 6 characters.'
+        )
         return
       }
 
@@ -99,53 +113,49 @@ export default function AdminRegisterPage() {
         formData.password !==
         formData.confirmPassword
       ) {
-        setError('Passwords do not match')
-        return
-      }
-
-      if (formData.password.length < 6) {
         setError(
-          'Password must be at least 6 characters'
+          'Passwords do not match.'
         )
         return
       }
 
       setIsLoading(true)
 
-      try {
-        const userCredential =
-          await createUserWithEmailAndPassword(
-            auth,
-            formData.email.trim(),
-            formData.password
-          )
-
-        await sendEmailVerification(
-          userCredential.user
+      const userCredential =
+        await createUserWithEmailAndPassword(
+          auth,
+          formData.email.trim(),
+          formData.password
         )
 
-        setEmailVerificationSent(true)
-      } catch (err: any) {
-        console.error(err)
+      await sendEmailVerification(
+        userCredential.user
+      )
 
-        if (
-          err.code ===
-          'auth/email-already-in-use'
-        ) {
-          setError(
-            'Email already registered'
-          )
-        } else {
-          setError(
-            err.message ||
-              'Failed to send verification email'
-          )
-        }
-      } finally {
-        setIsLoading(false)
+      setEmailVerificationSent(true)
+      setInfo(
+  'Verification email sent. Verify your email, then click Create Admin Account.'
+)
+    } catch (err: any) {
+      console.error(err)
+
+      if (
+        err.code ===
+        'auth/email-already-in-use'
+      ) {
+        setError(
+          'Email already registered.'
+        )
+      } else {
+        setError(
+          err.message ||
+            'Failed to send verification email.'
+        )
       }
+    } finally {
+      setIsLoading(false)
     }
-
+  }
   // =========================
   // HANDLE SUBMIT
   // =========================
@@ -405,24 +415,19 @@ export default function AdminRegisterPage() {
                   />
 
                   <Button
-                    type="button"
-                    variant="outline"
-                    className="shrink-0"
-                    onClick={
-                      sendEmailVerificationLink
-                    }
-                    disabled={
-                      !formData.email ||
-                      !formData.password ||
-                      !formData.confirmPassword ||
-                      emailVerificationSent ||
-                      isLoading
-                    }
-                  >
-                    {emailVerificationSent
-                      ? '✓ Verification Sent'
-                      : 'Verify Email'}
-                  </Button>
+  type="button"
+  variant="outline"
+  className="shrink-0"
+  onClick={sendEmailVerificationLink}
+  disabled={
+    emailVerificationSent ||
+    isLoading
+  }
+>
+  {emailVerificationSent
+    ? '✓ Verification Sent'
+    : 'Verify Email'}
+</Button>
                 </div>
 
                 {emailVerificationSent && (
@@ -594,6 +599,11 @@ export default function AdminRegisterPage() {
                   {error}
                 </p>
               )}
+              {info && (
+  <p className="text-sm text-blue-600 font-medium">
+    {info}
+  </p>
+)}
 
               {/* Submit */}
               <Button
