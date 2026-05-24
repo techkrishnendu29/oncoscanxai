@@ -272,7 +272,7 @@ export default function WelcomePage() {
           </section>
         </div>
       </main>{/* FOOTER */}
-{/* FOOTER */}
+
 {/* FOOTER */}
 <footer className="border-t border-zinc-800 bg-gradient-to-br from-black via-zinc-950 to-zinc-900 text-white">
 
@@ -363,19 +363,20 @@ export default function WelcomePage() {
       <div>
 
         <h3 className="font-semibold text-lg mb-4 text-white">
-          Development Team
+          Developer Info
         </h3>
 
         <div className="space-y-5 text-sm">
-
+          {/* Sayan */}
+          <div>
+            <p className="font-medium text-white">
+              Sayan Bag
+            </p>
+          </div>
           {/* Santanu */}
           <div>
             <p className="font-medium text-white">
               Santanu Pratihar
-            </p>
-
-            <p className="text-zinc-400">
-              Data Analyst
             </p>
           </div>
 
@@ -384,28 +385,13 @@ export default function WelcomePage() {
             <p className="font-medium text-white">
               Krishnendu Ghosh
             </p>
-
-            <p className="text-zinc-400">
-              AI & ML Developer
-            </p>
-          </div>
-
-          {/* Sayan */}
-          <div>
-            <p className="font-medium text-white">
-              Sayan Bag
-            </p>
-
-            <p className="text-zinc-400">
-              Full Stack Developer
-            </p>
           </div>
 
           <Link
-            href="mailto:support@oncoscanxai.com"
+            href="mailto:support@krishnendughosh.in"
             className="block text-zinc-400 hover:text-pink-400 transition-colors"
           >
-            support@oncoscanxai.com
+            support@krishnendughosh.in
           </Link>
 
         </div>
