@@ -103,16 +103,7 @@ export default function WelcomePage() {
                 Help
               </Button>
 
-              {/* SETTINGS */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSettings(true)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
+             
             </div>
           </div>
         </div>
@@ -163,49 +154,6 @@ export default function WelcomePage() {
         </div>
       )}
 
-      {/* SETTINGS MODAL */}
-      {showSettings && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onClick={() => setShowSettings(false)}
-        >
-          <Card
-            className="max-w-md mx-4 rounded-3xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <CardHeader>
-              <CardTitle>Settings</CardTitle>
-              <CardDescription>
-                User preferences
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span>Language</span>
-                <span className="text-muted-foreground">English</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>Theme</span>
-                <span className="text-muted-foreground">Light</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>Notifications</span>
-                <span className="text-muted-foreground">Enabled</span>
-              </div>
-
-              <Button
-                className="w-full rounded-xl"
-                onClick={() => setShowSettings(false)}
-              >
-                Close
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* MAIN */}
       <main className="pt-28 pb-16">
@@ -323,8 +271,185 @@ export default function WelcomePage() {
             </div>
           </section>
         </div>
-      </main>
+      </main>{/* FOOTER */}
+{/* FOOTER */}
+{/* FOOTER */}
+<footer className="border-t border-zinc-800 bg-gradient-to-br from-black via-zinc-950 to-zinc-900 text-white">
+
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+
+    {/* TOP SECTION */}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+
+      {/* BRAND */}
+      <div>
+        <div className="mb-4">
+          <Logo size="sm" />
+        </div>
+
+        <p className="text-sm text-zinc-400 leading-7">
+          OncoScanXAI is an AI-powered breast cancer
+          analysis platform designed to support
+          healthcare professionals with intelligent,
+          fast, and accurate diagnostic assistance.
+        </p>
+      </div>
+
+      {/* SUPPORT */}
+      <div>
+        <h3 className="font-semibold text-lg mb-4 text-white">
+          Support
+        </h3>
+
+        <div className="space-y-3 text-sm">
+
+          <Link
+            href="/contact"
+            className="block text-zinc-400 hover:text-pink-400 transition-colors"
+          >
+            Contact Us
+          </Link>
+
+          <Link
+            href="/support"
+            className="block text-zinc-400 hover:text-pink-400 transition-colors"
+          >
+            Help & Support
+          </Link>
+
+          <Link
+            href="/faq"
+            className="block text-zinc-400 hover:text-pink-400 transition-colors"
+          >
+            FAQ
+          </Link>
+
+        </div>
+      </div>
+
+      {/* LEGAL */}
+      <div>
+        <h3 className="font-semibold text-lg mb-4 text-white">
+          Legal
+        </h3>
+
+        <div className="space-y-3 text-sm">
+
+          <Link
+            href="/privacy-policy"
+            className="block text-zinc-400 hover:text-pink-400 transition-colors"
+          >
+            Privacy Policy
+          </Link>
+
+          <Link
+            href="/terms-and-conditions"
+            className="block text-zinc-400 hover:text-pink-400 transition-colors"
+          >
+            Terms & Conditions
+          </Link>
+
+          <Link
+            href="/cookies-policy"
+            className="block text-zinc-400 hover:text-pink-400 transition-colors"
+          >
+            Cookies Policy
+          </Link>
+
+        </div>
+      </div>
+
+      {/* DEVELOPMENT TEAM */}
+      <div>
+
+        <h3 className="font-semibold text-lg mb-4 text-white">
+          Development Team
+        </h3>
+
+        <div className="space-y-5 text-sm">
+
+          {/* Santanu */}
+          <div>
+            <p className="font-medium text-white">
+              Santanu Pratihar
+            </p>
+
+            <p className="text-zinc-400">
+              Data Analyst
+            </p>
+          </div>
+
+          {/* Krishnendu */}
+          <div>
+            <p className="font-medium text-white">
+              Krishnendu Ghosh
+            </p>
+
+            <p className="text-zinc-400">
+              AI & ML Developer
+            </p>
+          </div>
+
+          {/* Sayan */}
+          <div>
+            <p className="font-medium text-white">
+              Sayan Bag
+            </p>
+
+            <p className="text-zinc-400">
+              Full Stack Developer
+            </p>
+          </div>
+
+          <Link
+            href="mailto:support@oncoscanxai.com"
+            className="block text-zinc-400 hover:text-pink-400 transition-colors"
+          >
+            support@oncoscanxai.com
+          </Link>
+
+        </div>
+      </div>
+
     </div>
+
+    {/* BOTTOM SECTION */}
+    <div className="mt-12 pt-6 border-t border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4">
+
+      <p className="text-sm text-zinc-500">
+        © 2026 OncoScanXAI. All rights reserved.
+      </p>
+
+      <div className="flex items-center gap-6 text-sm">
+
+        <Link
+          href="/privacy-policy"
+          className="text-zinc-400 hover:text-pink-400 transition-colors"
+        >
+          Privacy
+        </Link>
+
+        <Link
+          href="/terms-and-conditions"
+          className="text-zinc-400 hover:text-pink-400 transition-colors"
+        >
+          Terms
+        </Link>
+
+        <Link
+          href="/contact"
+          className="text-zinc-400 hover:text-pink-400 transition-colors"
+        >
+          Contact
+        </Link>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</footer>
+</div>
   )
 }
-
