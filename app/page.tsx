@@ -274,8 +274,7 @@ export default function WelcomePage() {
       </main>{/* FOOTER */}
 
 {/* FOOTER */}
-<footer className="border-t border-zinc-800 bg-gradient-to-br from-black via-zinc-950 to-zinc-900 text-white">
-
+<footer className="border-t border-white/10 bg-black/80 backdrop-blur-md text-white/90">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
 
     {/* TOP SECTION */}
