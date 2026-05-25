@@ -136,7 +136,7 @@ export default function PatientUploadScanPage() {
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl">Upload Medical Scan</CardTitle>
                 <CardDescription>
-                  Supported formats: PNG, JPG, JPEG, DICOM
+                  Supported formats: PNG, DCM, JPEG, DICOM
                 </CardDescription>
               </CardHeader>
 
@@ -174,7 +174,7 @@ export default function PatientUploadScanPage() {
                   <input
                     type="file"
                     id="scan-upload"
-                    accept=".png,.jpg,.jpeg,.dcm"
+                    accept=".png,.dcm,.jpeg,.dcm"
                     className="hidden"
                     onChange={(e) => {
                       if (e.target.files?.[0]) {
