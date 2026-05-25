@@ -39,7 +39,7 @@ export default function PatientUploadScanPage() {
   const allowedTypes = [
     'image/png',
     'image/jpeg',
-    'image/jpg',
+    'image/dcm',
     'application/dicom',
   ]
 
