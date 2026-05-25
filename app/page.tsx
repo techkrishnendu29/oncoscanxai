@@ -147,7 +147,7 @@ export default function WelcomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <section className="text-center py-12 lg:py-20">
             <div className="flex justify-center mb-8">
-              <Logo size="lg" />
+              <Logo size="elg" />
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight mb-8">
