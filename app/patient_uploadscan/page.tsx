@@ -39,13 +39,23 @@ export default function PatientUploadScanPage() {
   const allowedTypes = [
     'image/png',
     'image/jpeg',
-    'image/dcm',
+    'image/jpg',
     'application/dicom',
+    'application/dicom+json',
+    '',
   ]
 
+  const allowedExtensions = ['png', 'jpg', 'jpeg', 'dcm']
+
   const handleFile = (selectedFile: File) => {
-    if (!allowedTypes.includes(selectedFile.type)) {
-      alert('Only PNG, JPG, JPEG, and DICOM files are allowed.')
+    const extension = selectedFile.name.split('.').pop()?.toLowerCase()
+
+    const isValidType =
+      allowedTypes.includes(selectedFile.type) ||
+      (extension && allowedExtensions.includes(extension))
+
+    if (!isValidType) {
+      alert('Only PNG, JPG, JPEG, and DICOM (.dcm) files are allowed.')
       return
     }
 
@@ -61,9 +71,10 @@ export default function PatientUploadScanPage() {
 
     const steps = [
       'Uploading scan...',
-      'Preprocessing image...',
-      'Running AI model...',
-      'Generating AI analysis...',
+      'Validating medical image...',
+      'Preprocessing scan...',
+      'Running AI diagnostic model...',
+      'Generating analysis...',
     ]
 
     for (const s of steps) {
@@ -107,7 +118,7 @@ export default function PatientUploadScanPage() {
 
         {/* Main */}
         <main className="max-w-5xl mx-auto px-6 py-16">
-          {/* Hero Section */}
+          {/* Hero */}
           <section className="text-center mb-14">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/70 px-4 py-2 backdrop-blur">
               <Brain className="h-4 w-4 text-purple-600" />
@@ -125,7 +136,7 @@ export default function PatientUploadScanPage() {
             </h2>
 
             <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Upload your mammogram, MRI, or DICOM scan and get instant
+              Upload your mammogram, MRI, or DICOM scan and receive instant
               AI-powered diagnostic analysis.
             </p>
           </section>
@@ -136,7 +147,7 @@ export default function PatientUploadScanPage() {
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl">Upload Medical Scan</CardTitle>
                 <CardDescription>
-                  Supported formats: PNG, DCM, JPEG, DICOM
+                  Supported formats: PNG, JPG, JPEG, DICOM (.dcm)
                 </CardDescription>
               </CardHeader>
 
@@ -151,7 +162,7 @@ export default function PatientUploadScanPage() {
                     e.preventDefault()
                     setDragging(false)
 
-                    if (e.dataTransfer.files[0]) {
+                    if (e.dataTransfer.files?.[0]) {
                       handleFile(e.dataTransfer.files[0])
                     }
                   }}
@@ -168,13 +179,13 @@ export default function PatientUploadScanPage() {
                   </h3>
 
                   <p className="text-muted-foreground mb-6">
-                    Mammogram, MRI, or DICOM image
+                    Mammogram, MRI, or DICOM (.dcm) image
                   </p>
 
                   <input
                     type="file"
                     id="scan-upload"
-                    accept=".png,.dcm,.jpeg,.dcm"
+                    accept=".png,.jpg,.jpeg,.dcm,application/dicom"
                     className="hidden"
                     onChange={(e) => {
                       if (e.target.files?.[0]) {
@@ -214,7 +225,7 @@ export default function PatientUploadScanPage() {
                   </div>
                 )}
 
-                {/* Analyze Button */}
+                {/* Analyze */}
                 {file && !loading && (
                   <Button
                     onClick={simulateAnalysis}
@@ -241,7 +252,7 @@ export default function PatientUploadScanPage() {
             </Card>
           )}
 
-          {/* Results Section */}
+          {/* Results */}
           {result && (
             <Card className="border-white/30 bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl">
               <CardHeader className="text-center">
@@ -250,6 +261,7 @@ export default function PatientUploadScanPage() {
                 </div>
 
                 <CardTitle className="text-3xl">AI Analysis Result</CardTitle>
+
                 <CardDescription>
                   Preliminary AI-generated diagnostic assessment
                 </CardDescription>
