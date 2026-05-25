@@ -13,8 +13,8 @@ export function Logo({
   size = 'md',
 }: LogoProps) {
   const sizes = {
-    sm: 128,
-    md: 44,
+    sm: 138,
+    md: 175,
     lg: 204,
     elg: 404
   }
