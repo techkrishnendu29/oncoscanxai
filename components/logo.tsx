@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 
 interface LogoProps {
   className?: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'elg'
 }
 
 export function Logo({
@@ -16,6 +16,7 @@ export function Logo({
     sm: 32,
     md: 44,
     lg: 204,
+    elg: 604
   }
 
   const icon = sizes[size]
