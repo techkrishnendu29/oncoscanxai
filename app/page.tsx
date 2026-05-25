@@ -181,7 +181,7 @@ export default function WelcomePage() {
                 </CardHeader>
 
                 <CardContent>
-                  <Link href="patient_uploadscan">
+                  <Link href="app/patient_uploadscan">
                     <Button className="w-full rounded-xl h-12 text-base">
                       <Upload className="mr-2 h-5 w-5" />
                       Upload Scan
