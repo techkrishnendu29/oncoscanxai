@@ -61,7 +61,9 @@ export default function WelcomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass backdrop-blur-xl border-b border-white/10 bg-background/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <Logo size="sm" />
+            <div className="flex items-center">
+              <Logo size="sm" />
+            </div>
 
             <div className="flex items-center gap-3">
               <DropdownMenu>
@@ -271,15 +273,9 @@ export default function WelcomePage() {
                 Resources
               </h3>
               <ul className="space-y-4 text-sm">
-                <li>
-                  <Link href="/contact">Contact Us</Link>
-                </li>
-                <li>
-                  <Link href="/support">Help & Support</Link>
-                </li>
-                <li>
-                  <Link href="/faq">Frequently Asked Questions</Link>
-                </li>
+                <li><Link href="/contact">Contact Us</Link></li>
+                <li><Link href="/support">Help & Support</Link></li>
+                <li><Link href="/faq">Frequently Asked Questions</Link></li>
               </ul>
             </div>
 
@@ -288,15 +284,9 @@ export default function WelcomePage() {
                 Legal
               </h3>
               <ul className="space-y-4 text-sm">
-                <li>
-                  <Link href="/privacy-policy">Privacy Policy</Link>
-                </li>
-                <li>
-                  <Link href="/terms">Terms of Service</Link>
-                </li>
-                <li>
-                  <Link href="/cookies">Cookie Settings</Link>
-                </li>
+                <li><Link href="/privacy-policy">Privacy Policy</Link></li>
+                <li><Link href="/terms">Terms of Service</Link></li>
+                <li><Link href="/cookies">Cookie Settings</Link></li>
               </ul>
             </div>
 
@@ -321,7 +311,7 @@ export default function WelcomePage() {
 
           <div className="mt-16 pt-8 border-t border-zinc-900 flex flex-col sm:flex-row justify-between items-center gap-6">
             <p className="text-xs text-zinc-500">
-              © {currentYear} OncoScanXAI. Precision in every pixel.
+              © {currentYear}. Precision in every pixel.
             </p>
 
             <div className="flex items-center gap-2">
