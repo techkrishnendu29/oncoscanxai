@@ -12,6 +12,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 
+import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -28,7 +29,7 @@ type AnalysisResult = {
   recommendation: string
 }
 
-export default function ScanAnalysisPage() {
+export default function PatientUploadScanPage() {
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -62,7 +63,7 @@ export default function ScanAnalysisPage() {
       'Uploading scan...',
       'Preprocessing image...',
       'Running AI model...',
-      'Generating analysis...',
+      'Generating AI analysis...',
     ]
 
     for (const s of steps) {
@@ -84,7 +85,7 @@ export default function ScanAnalysisPage() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background */}
+      {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-100 via-white to-pink-100" />
       <div className="absolute top-20 left-20 h-72 w-72 rounded-full bg-purple-400/20 blur-3xl" />
       <div className="absolute bottom-20 right-20 h-72 w-72 rounded-full bg-pink-400/20 blur-3xl" />
@@ -100,20 +101,18 @@ export default function ScanAnalysisPage() {
               </Button>
             </Link>
 
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
-              OncoScanXAI
-            </h1>
+            <Logo size="lg" />
           </div>
         </nav>
 
         {/* Main */}
         <main className="max-w-5xl mx-auto px-6 py-16">
-          {/* Hero */}
+          {/* Hero Section */}
           <section className="text-center mb-14">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/70 px-4 py-2 backdrop-blur">
               <Brain className="h-4 w-4 text-purple-600" />
               <span className="text-sm font-medium">
-                AI-Powered Breast Scan Analysis
+                AI-Powered Breast Cancer Screening
               </span>
             </div>
 
@@ -126,16 +125,16 @@ export default function ScanAnalysisPage() {
             </h2>
 
             <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Upload your mammogram, MRI, or DICOM scan and receive instant
-              AI-powered analysis.
+              Upload your mammogram, MRI, or DICOM scan and get instant
+              AI-powered diagnostic analysis.
             </p>
           </section>
 
-          {/* Upload Card */}
+          {/* Upload Section */}
           {!result && (
             <Card className="border-white/30 bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Upload Scan</CardTitle>
+                <CardTitle className="text-2xl">Upload Medical Scan</CardTitle>
                 <CardDescription>
                   Supported formats: PNG, JPG, JPEG, DICOM
                 </CardDescription>
@@ -165,7 +164,7 @@ export default function ScanAnalysisPage() {
                   <Upload className="h-16 w-16 mx-auto text-purple-600 mb-6" />
 
                   <h3 className="text-xl font-semibold mb-3">
-                    Drag & Drop Scan Here
+                    Drag & Drop Your Scan Here
                   </h3>
 
                   <p className="text-muted-foreground mb-6">
@@ -187,10 +186,10 @@ export default function ScanAnalysisPage() {
                   <label htmlFor="scan-upload">
                     <Button
                       type="button"
-                      className="rounded-xl cursor-pointer"
                       asChild
+                      className="rounded-xl cursor-pointer"
                     >
-                      <span>Choose File</span>
+                      <span>Select Scan File</span>
                     </Button>
                   </label>
                 </div>
@@ -215,7 +214,7 @@ export default function ScanAnalysisPage() {
                   </div>
                 )}
 
-                {/* Analyze */}
+                {/* Analyze Button */}
                 {file && !loading && (
                   <Button
                     onClick={simulateAnalysis}
@@ -242,7 +241,7 @@ export default function ScanAnalysisPage() {
             </Card>
           )}
 
-          {/* Result */}
+          {/* Results Section */}
           {result && (
             <Card className="border-white/30 bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl">
               <CardHeader className="text-center">
@@ -251,6 +250,9 @@ export default function ScanAnalysisPage() {
                 </div>
 
                 <CardTitle className="text-3xl">AI Analysis Result</CardTitle>
+                <CardDescription>
+                  Preliminary AI-generated diagnostic assessment
+                </CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-8">
@@ -281,12 +283,12 @@ export default function ScanAnalysisPage() {
                 </div>
 
                 <Button
+                  variant="outline"
+                  className="w-full h-14 rounded-2xl"
                   onClick={() => {
                     setFile(null)
                     setResult(null)
                   }}
-                  className="w-full h-14 rounded-2xl"
-                  variant="outline"
                 >
                   <CheckCircle2 className="mr-2 h-5 w-5" />
                   Upload Another Scan
