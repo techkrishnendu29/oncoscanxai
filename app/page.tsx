@@ -255,94 +255,162 @@ export default function WelcomePage() {
         </div>
       </main>
 
-      {/* FOOTER */}
-      <footer className="relative border-t border-teal-500/20 bg-zinc-950 text-zinc-300 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-teal-500/10 blur-[120px] pointer-events-none" />
+{/* PROFESSIONAL FOOTER WITH LOGO */}
+<footer className="relative border-t border-white/10 bg-zinc-950 text-zinc-300 overflow-hidden">
+  <div className="absolute inset-0 bg-gradient-to-t from-black via-zinc-950 to-zinc-900 opacity-95" />
+  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-primary/10 blur-[120px] pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-lg shadow-lg shadow-teal-500/20" />
-                <span className="text-xl font-bold tracking-tight text-white">
-                  OncoScan<span className="text-teal-400">XAI</span>
-                </span>
-              </div>
-
-              <p className="text-sm leading-relaxed text-zinc-400 max-w-xs">
-                Empowering healthcare professionals with AI-driven insights for
-                faster, more accurate breast cancer diagnostic assistance.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white mb-6">
-                Resources
-              </h3>
-              <ul className="space-y-4 text-sm">
-                <li>
-                  <Link href="/contact">Contact Us</Link>
-                </li>
-                <li>
-                  <Link href="/support">Help & Support</Link>
-                </li>
-                <li>
-                  <Link href="/faq">Frequently Asked Questions</Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white mb-6">
-                Legal
-              </h3>
-              <ul className="space-y-4 text-sm">
-                <li>
-                  <Link href="/privacy-policy">Privacy Policy</Link>
-                </li>
-                <li>
-                  <Link href="/terms">Terms of Service</Link>
-                </li>
-                <li>
-                  <Link href="/cookies">Cookie Settings</Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white mb-6">
-                The Team
-              </h3>
-              <div className="space-y-4">
-                <p>Sayan Bag</p>
-                <p>Santanu Pratihar</p>
-                <p>Krishnendu Ghosh</p>
-
-                <a
-                  href="mailto:support@krishnendughosh.in"
-                  className="inline-block mt-2 text-xs font-medium px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-teal-400"
-                >
-                  support@krishnendughosh.in
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-16 pt-8 border-t border-zinc-900 flex flex-col sm:flex-row justify-between items-center gap-6">
-            <p className="text-xs text-zinc-500">
-              © {new Date().getFullYear()} OncoScanXAI. Precision in every
-              pixel.
-            </p>
-
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
-                System Operational
-              </span>
-            </div>
-          </div>
+  <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+      
+      {/* BRAND */}
+      <div className="space-y-6">
+        <div className="flex items-center">
+          <Logo size="sm" />
         </div>
-      </footer>
+
+        <p className="text-sm leading-relaxed text-zinc-400 max-w-sm">
+          AI-powered breast cancer diagnostic assistance platform designed for
+          healthcare professionals, enabling faster, explainable, and accurate
+          scan analysis.
+        </p>
+
+        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2">
+          <div className="h-2 w-2 rounded-full bg-emerald-400" />
+          <span className="text-xs font-medium text-emerald-300">
+            Clinical Decision Support Platform
+          </span>
+        </div>
+      </div>
+
+      {/* PLATFORM */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-white mb-6">
+          Platform
+        </h3>
+
+        <ul className="space-y-4 text-sm">
+          <li>
+            <Link
+              href="/dashboard/upload-scan"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              Upload Scan
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              href="/auth/guest"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              View Results
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              href="/faq"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              FAQs
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      {/* SUPPORT */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-white mb-6">
+          Support
+        </h3>
+
+        <ul className="space-y-4 text-sm">
+          <li>
+            <Link
+              href="/contact"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              Contact Us
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              href="/support"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              Help Center
+            </Link>
+          </li>
+
+          <li>
+            <a
+              href="mailto:support@krishnendughosh.in"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              support@krishnendughosh.in
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      {/* LEGAL */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-white mb-6">
+          Legal
+        </h3>
+
+        <ul className="space-y-4 text-sm">
+          <li>
+            <Link
+              href="/privacy-policy"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              Privacy Policy
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              href="/terms"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              Terms of Service
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              href="/cookies"
+              className="text-zinc-400 hover:text-white transition-colors duration-200"
+            >
+              Cookie Policy
+            </Link>
+          </li>
+        </ul>
+      </div>
     </div>
-  )
-}
+
+    {/* DISCLAIMER */}
+    <div className="mt-12 border-t border-white/10 pt-8">
+      <p className="text-xs leading-relaxed text-zinc-500 max-w-4xl">
+        <span className="font-semibold text-zinc-400">Medical Disclaimer:</span>{" "}
+        OncoScanXAI provides AI-assisted clinical decision support and is not a
+        substitute for professional medical diagnosis, treatment, or physician
+        judgment.
+      </p>
+    </div>
+
+    {/* BOTTOM BAR */}
+    <div className="mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <p className="text-xs text-zinc-500">
+        © {new Date().getFullYear()} OncoScanXAI. All rights reserved.
+      </p>
+
+      <p className="text-xs text-zinc-500">
+        Built with AI for modern healthcare innovation.
+      </p>
+    </div>
+  </div>
+</footer>
