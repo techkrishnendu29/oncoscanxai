@@ -15,7 +15,7 @@ export function Logo({
   const sizes = {
     sm: 32,
     md: 44,
-    lg: 64,
+    lg: 104,
   }
 
   const icon = sizes[size]
