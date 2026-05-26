@@ -150,7 +150,7 @@ export default function WelcomePage() {
               <Logo size="elg" />
             </div>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight mb-8">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-8">
               Advanced AI-Powered
               <br />
               <span className="bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
